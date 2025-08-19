@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  image         String?
+  studentNumber String?   @unique
+  password      String? // For student number authentication
+  emailVerified DateTime?
+  role          UserRole  @default(VOTER)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  candidate Candidate?
+  votes     Vote[]
+  accounts  Account[]
+  sessions  Session[]
+  systemLog SystemLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Party {
+  id        String      @id @default(cuid())
+  name      String
+  description String?
+  logoUrl   String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  candidates Candidate[]
+}
+
+model Candidate {
+  id         String          @id @default(cuid())
+  userId     String          @unique
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position   String
+  partyId    String
+  party      Party?          @relation(fields: [partyId], references: [id], onDelete: Cascade)
+  platform   String
+  imageUrl   String?
+  status     CandidateStatus @default(PENDING)
+  electionId String
+  election   Election        @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  votes      Vote[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@map("candidates")
+}
+
+model Election {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  type        String
+  startDate   DateTime
+  endDate     DateTime
+  status      ElectionStatus @default(UPCOMING)
+  positions   String[]
+  isActive    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  candidates Candidate[]
+  votes      Vote[]
+
+  @@map("elections")
+}
+
+model Vote {
+  id          String    @id @default(cuid())
+  voterId     String
+  voter       User      @relation(fields: [voterId], references: [id], onDelete: Cascade)
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  electionId  String
+  election    Election  @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  position    String
+  createdAt   DateTime  @default(now())
+
+  @@unique([voterId, electionId, position])
+  @@map("votes")
+}
+
+model SystemLog {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  details   String?
+  timestamp DateTime @default(now())
+
+  @@map("system_logs")
+}
+
+enum UserRole {
+  ADMIN
+  ELECTION_OFFICER
+  CANDIDATE
+  VOTER
+}
+
+enum CandidateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ElectionStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
