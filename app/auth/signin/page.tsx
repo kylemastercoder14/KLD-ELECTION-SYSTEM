@@ -77,7 +77,7 @@ export default function SignIn() {
         router.push("/officer");
         break;
       case "CANDIDATE":
-        router.push("/candidate");
+        router.push("/voter");
         break;
       default:
         router.push("/voter");

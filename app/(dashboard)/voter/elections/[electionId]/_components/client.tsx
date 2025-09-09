@@ -12,7 +12,7 @@ import {
 import { Candidate, Election, Party, User as UserType } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "../../../../../../components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 interface VoteState {
   [position: string]: string;

@@ -1,3 +1,4 @@
+import { UserRole } from "@prisma/client";
 import { z } from "zod";
 
 export const ElectionValidators = z
@@ -47,4 +48,16 @@ export const CandidateValidators = z.object({
   electionId: z.string().min(1, { message: "Election is required." }),
   platform: z.string().min(1, { message: "Platform is required." }),
   imageUrl: z.string().optional(),
+});
+
+export const UserValidators = z.object({
+  name: z.string().min(1, { message: "Name is required." }),
+  email: z.string().email({ message: "Invalid email address." }),
+  studentNumber: z.string().min(1, { message: "Student number is required." }),
+  role: z.nativeEnum(UserRole, {
+    errorMap: () => ({ message: "Role is required." }),
+  }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters." }),
 });

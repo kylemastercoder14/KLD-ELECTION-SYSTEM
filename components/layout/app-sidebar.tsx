@@ -13,6 +13,7 @@ import {
   Sun,
   Moon,
   Building,
+  UserCog,
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,6 +40,7 @@ const menuItems = {
     { title: "Elections", url: "/admin/elections", icon: Calendar },
     { title: "Partylist", url: "/admin/party-list", icon: Building },
     { title: "Candidates", url: "/admin/candidates", icon: UserCheck },
+    { title: "Accounts", url: "/admin/accounts", icon: UserCog },
     { title: "Voters", url: "/admin/voters", icon: Users },
     { title: "System Logs", url: "/admin/logs", icon: Shield },
     { title: "Settings", url: "/admin/settings", icon: Settings },

@@ -4,7 +4,6 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "./prisma";
-import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -54,12 +53,8 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          const isValidPassword = await bcrypt.compare(
-            credentials.password,
-            user.password || ""
-          );
-
-          if (!isValidPassword) {
+          // Direct string comparison (no bcrypt)
+          if (credentials.password !== user.password) {
             console.log(
               `Credentials Provider: Invalid password for user ${credentials.studentNumber}.`
             );
@@ -311,7 +306,7 @@ export const authOptions: NextAuthOptions = {
   },
   debug: process.env.NODE_ENV === "development",
   session: {
-    strategy: "database",
+    strategy: "jwt",
   },
   events: {
     async signIn(message) {
