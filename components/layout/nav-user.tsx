@@ -27,15 +27,19 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { signOut, useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { UserRole } from '@prisma/client'
 
 export function NavUser() {
   const { data: session } = useSession();
+  const router = useRouter();
 
   if (!session?.user) return null;
 
   const user = session.user;
   const nameFallback = user.email?.split('@')[0] || 'User';
-
+  const role = user.role as UserRole;
+  const adminPath = role === UserRole.ADMIN ? '/admin' : '/voter';
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -80,11 +84,11 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`${adminPath}/profile`)}>
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`${adminPath}/vote-history`)}>
                 <IconFileText />
                 Vote History
               </DropdownMenuItem>
